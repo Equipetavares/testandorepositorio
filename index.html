@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Separador Cirúrgico de Código</title>
+  <!-- Dependências via CDN para funcionar sem instalação -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="css/style.css"></head>
+<body class="min-h-screen p-4 md:p-8 font-sans flex flex-col items-center">
+  <header class="text-center space-y-4 mb-8 w-full max-w-4xl">
+    <div class="inline-flex items-center justify-center p-3 bg-blue-500/10 rounded-full mb-2">
+      <i data-lucide="shield-check" class="text-blue-400 w-9 h-9"></i>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white">Separador Cirúrgico de Código</h1>
+    <p class="text-gray-400 text-base md:text-lg max-w-2xl mx-auto px-4">
+      Leitura profunda de DOM. Extraímos o seu HTML, CSS e JS com máxima precisão, sem pressa, garantindo que nada quebre quando for publicado.
+    </p>
+  </header>
+  <div class="w-full max-w-4xl bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+    <!-- Tela 1: Inserção de Código -->
+    <div id="screen-input" class="p-6 flex flex-col h-[600px] w-full">
+      <div class="flex items-center justify-between border-b border-gray-800 pb-4 mb-6">
+         <h3 class="text-lg font-medium text-white flex items-center gap-2">
+           <i data-lucide="braces" class="text-blue-400 w-5 h-5"></i>
+           Cole o código completo e misturado:
+         </h3>
+         <span class="text-xs text-blue-300 bg-blue-900/30 px-3 py-1 rounded-full border border-blue-800/50 flex items-center gap-1">
+           <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Análise DOM Ativada
+         </span>
+      </div>
+      <textarea id="rawCode" placeholder="Cole aqui todo o código fonte. O sistema irá ler cuidadosamente linha por linha..." class="flex-1 w-full bg-gray-950 text-gray-300 font-mono text-sm p-4 outline-none border border-gray-800 rounded-lg custom-scrollbar focus:border-blue-500 transition-colors resize-none mb-6" spellcheck="false"></textarea>
+      <button onclick="processAndSplitCode()" id="btn-process" class="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-lg transition-all shadow-lg hover:shadow-blue-500/25 text-lg">
+        <i data-lucide="folder-git-2" class="w-6 h-6"></i>
+        Processar Código com Precisão
+      </button>
+    </div>
+    <!-- Tela 2: Processamento -->
+    <div id="screen-processing" class="hidden text-center py-24 px-6 flex-col items-center justify-center h-[600px] w-full">
+       <i data-lucide="loader-2" class="text-blue-400 animate-spin-slow w-16 h-16 mb-6 mx-auto"></i>
+       <h2 class="text-2xl font-bold text-white mb-2">A processar o seu código...</h2>
+       <p id="processingStep" class="text-blue-400 font-mono text-sm bg-gray-950 px-4 py-2 rounded border border-gray-800 animate-pulse mt-4 inline-block">
+         A iniciar análise...
+       </p>
+    </div>
+    <!-- Tela 3: Sucesso -->
+    <div id="screen-success" class="hidden text-center py-10 px-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar w-full">
+      <div class="inline-flex items-center justify-center p-4 bg-green-500/20 rounded-full mx-auto">
+        <i data-lucide="check-circle" class="text-green-400 w-16 h-16"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-white mt-4">Projeto Extraído com Segurança!</h2>
+      <div class="bg-gray-950 p-4 rounded-lg inline-block text-left text-sm text-gray-400 border border-gray-800 mt-6 mx-auto max-w-lg">
+        <p class="text-white mb-2 font-semibold">Relatório de Precisão:</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Árvore HTML mantida intacta usando DOMParser.</li>
+          <li>CSS isolado sem quebrar seletores.</li>
+          <li>Scripts convertidos preservando formatação.</li>
+          <li>Tags <code>&lt;link&gt;</code> e <code>&lt;script src&gt;</code> inseridas nos nós corretos.</li>
+        </ul>
+      </div>
+      <div class="flex flex-col sm:flex-row justify-center gap-4 pt-6">
+        <button onclick="triggerDownload()" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg transition-colors text-lg cursor-pointer shadow-lg shadow-blue-500/20">
+          <i data-lucide="download" class="w-6 h-6"></i>
+          Descarregar Pasta Segura (.zip)
+        </button>
+        <button onclick="resetSystem()" class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white font-medium py-4 px-8 rounded-lg transition-colors text-lg">
+          Novo Código
+        </button>
+      </div>
+      <div class="mt-8 text-left bg-gray-950 rounded-lg p-4 border border-gray-800 w-full">
+        <p class="text-sm text-gray-400 mb-4 flex items-center gap-2">
+           <i data-lucide="file-text" class="w-4 h-4"></i> Inspeção Manual (Ficheiros Gerados):
+        </p>
+        <div class="space-y-4">
+          <div id="section-html" class="hidden">
+            <div class="flex items-center justify-between text-xs text-blue-400 mb-1 font-semibold">
+              <span>index.html</span>
+              <button onclick="copyToClipboard('out-html')" class="hover:text-white flex items-center gap-1 bg-gray-900 px-2 py-1 rounded transition-colors"><i data-lucide="copy" class="w-3 h-3"></i> Copiar</button>
+            </div>
+            <textarea id="out-html" readonly="" class="w-full h-24 bg-gray-900 text-gray-400 font-mono text-xs p-2 rounded custom-scrollbar border border-gray-800 resize-none outline-none"></textarea>
+          </div>
+          <div id="section-css" class="hidden">
+            <div class="flex items-center justify-between text-xs text-blue-400 mb-1 font-semibold">
+              <span>css/style.css</span>
+              <button onclick="copyToClipboard('out-css')" class="hover:text-white flex items-center gap-1 bg-gray-900 px-2 py-1 rounded transition-colors"><i data-lucide="copy" class="w-3 h-3"></i> Copiar</button>
+            </div>
+            <textarea id="out-css" readonly="" class="w-full h-24 bg-gray-900 text-gray-400 font-mono text-xs p-2 rounded custom-scrollbar border border-gray-800 resize-none outline-none"></textarea>
+          </div>
+          <div id="section-js" class="hidden">
+            <div class="flex items-center justify-between text-xs text-yellow-400 mb-1 font-semibold">
+              <span>js/script.js</span>
+              <button onclick="copyToClipboard('out-js')" class="hover:text-white flex items-center gap-1 bg-gray-900 px-2 py-1 rounded transition-colors"><i data-lucide="copy" class="w-3 h-3"></i> Copiar</button>
+            </div>
+            <textarea id="out-js" readonly="" class="w-full h-24 bg-gray-900 text-gray-400 font-mono text-xs p-2 rounded custom-scrollbar border border-gray-800 resize-none outline-none"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script src="js/script.js"></script></body></html>
